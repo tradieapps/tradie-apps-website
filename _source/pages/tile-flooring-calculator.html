@@ -1,0 +1,73 @@
+<!-- title: Tile & Flooring Calculator – How many boxes do I need?
+desc: Free tile and flooring calculator. Enter the room size, layout and box coverage to get area with waste, boxes, tile count and cost. Metric and imperial.
+-->
+<section><div class="wrap">
+<h1>Tile &amp; flooring calculator</h1>
+<p class="lead">Work out boxes, tiles and cost for tiles, laminate, vinyl plank or timber, with the right waste allowance.</p>
+<div class="units"><button data-u="met">Metric (m, mm)</button><button data-u="imp">Imperial (ft, in)</button></div>
+<div class="calc">
+<div class="card">
+<h3>Area</h3>
+<div class="row two">
+<div class="field"><label>Length (<span data-m="m" data-i="ft"></span>)</label><input id="len" type="number" inputmode="decimal" min="0" step="any"></div>
+<div class="field"><label>Width (<span data-m="m" data-i="ft"></span>)</label><input id="wid" type="number" inputmode="decimal" min="0" step="any"></div>
+</div>
+<div class="field"><label>Extra area (<span data-m="m²" data-i="sq ft"></span>)</label><input id="extra" type="number" inputmode="decimal" min="0" step="any" value="0"><span class="hint">Add an L-shape, hallway or a wall to tile. Leave at 0 if not needed.</span></div>
+<div class="field"><label>Layout / waste allowance</label>
+<select id="waste">
+<option value="5">Plank flooring, straight lay – 5%</option>
+<option value="10" selected>Tiles, straight lay – 10%</option>
+<option value="12">Brick / offset pattern – 12%</option>
+<option value="15">Diagonal tiles – 15%</option>
+<option value="20">Herringbone / chevron – 20%</option>
+</select></div>
+<h3>Product</h3>
+<div class="row two">
+<div class="field"><label>Coverage per box (<span data-m="m²" data-i="sq ft"></span>)</label><input id="box" type="number" inputmode="decimal" min="0" step="any"><span class="hint">Printed on the box or product page.</span></div>
+<div class="field"><label>Price per box ($, optional)</label><input id="price" type="number" inputmode="decimal" min="0" step="any"></div>
+</div>
+<div class="row two">
+<div class="field"><label>Tile length (<span data-m="mm" data-i="in"></span>, optional)</label><input id="tl" type="number" inputmode="decimal" min="0" step="any"></div>
+<div class="field"><label>Tile width (<span data-m="mm" data-i="in"></span>, optional)</label><input id="tw" type="number" inputmode="decimal" min="0" step="any"></div>
+</div>
+</div>
+<div class="result">
+<div class="lbl">Boxes to buy</div><div class="big" id="rBoxes">–</div>
+<dl>
+<dt>Floor area</dt><dd id="rArea">–</dd>
+<dt>Area incl. waste</dt><dd id="rAreaW">–</dd>
+<dt>Tiles (approx.)</dt><dd id="rTiles">–</dd>
+<dt>Material cost</dt><dd id="rCost">–</dd>
+</dl>
+<div class="promo">⚡ <b>QuoteWalk</b> measures floors with your iPhone's LiDAR, takes off what you switch off, and builds the quote at your rate per m² or sq ft.<div class="btns">{STORE_QW}</div></div>
+</div>
+</div>
+</div></section>
+
+<section class="alt"><div class="wrap prose">
+<h2>How much waste should I allow?</h2>
+<p>Cuts at walls, doorways and around obstacles mean you always need more material than the bare floor area. As a rule of thumb, allow about 5% for straight-laid planks, 10% for tiles laid square, 15% for diagonal layouts and up to 20% for herringbone or chevron. Add a little more for small, awkward rooms, and keep a few spare tiles for future repairs.</p>
+<h3>Example</h3>
+<p>A 4.2 m × 3.0 m kitchen is 12.6 m². With 10% waste that's 13.86 m². Tiles at 1.44 m² per box need 13.86 ÷ 1.44 = 9.6, so buy 10 boxes.</p>
+<h3>Tips</h3>
+<ul><li>Buy all boxes from the same batch (check the shade/lot number).</li><li>Round up to whole boxes. Most suppliers will take back unopened boxes, but check first.</li><li>For walls, enter width × height of each wall as the extra area.</li></ul>
+</div></section>
+<script>
+(function(){
+var imp=false;
+function calc(){
+  var a=TA.num("len")*TA.num("wid")+TA.num("extra"), w=+document.getElementById("waste").value;
+  var aw=a*(1+w/100), box=TA.num("box"), price=TA.num("price"), au=imp?"sq ft":"m²";
+  var tl=TA.num("tl"), tw=TA.num("tw");
+  var tileA=imp?(tl*tw)/144:(tl*tw)/1e6;
+  var boxes=box?Math.ceil(aw/box-1e-9):0;
+  document.getElementById("rArea").textContent=a?TA.fmt(a,2)+" "+au:"–";
+  document.getElementById("rAreaW").textContent=a?TA.fmt(aw,2)+" "+au:"–";
+  document.getElementById("rBoxes").textContent=a&&box?boxes+(boxes===1?" box":" boxes"):"–";
+  document.getElementById("rTiles").textContent=a&&tileA?TA.fmt(Math.ceil(aw/tileA),0)+" tiles":"–";
+  document.getElementById("rCost").textContent=a&&box&&price?TA.money(boxes*price):"–";
+}
+TA.units(function(i){imp=i;calc();});
+document.querySelectorAll("input,select").forEach(function(e){e.addEventListener("input",calc);e.addEventListener("change",calc);});
+})();
+</script>

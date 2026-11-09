@@ -1,0 +1,86 @@
+<!-- title: Paint Calculator – How much paint do I need? (litres & gallons)
+desc: Free paint calculator for walls and ceilings. Enter the room size, doors, windows and coats to get litres or gallons and how many tins to buy.
+-->
+<section><div class="wrap">
+<h1>Paint calculator</h1>
+<p class="lead">Work out how much paint a room needs, walls and ceiling, with doors, windows and coats included.</p>
+<div class="units"><button data-u="met">Metric (m, L)</button><button data-u="imp">Imperial (ft, gal)</button></div>
+<div class="calc">
+<div class="card">
+<h3>Room size</h3>
+<div class="row">
+<div class="field"><label>Length (<span data-m="m" data-i="ft"></span>)</label><input id="len" type="number" inputmode="decimal" min="0" step="any"></div>
+<div class="field"><label>Width (<span data-m="m" data-i="ft"></span>)</label><input id="wid" type="number" inputmode="decimal" min="0" step="any"></div>
+<div class="field"><label>Wall height (<span data-m="m" data-i="ft"></span>)</label><input id="hei" type="number" inputmode="decimal" min="0" step="any"></div>
+</div>
+<div class="row two">
+<div class="field"><label>Doors</label><input id="doors" type="number" min="0" step="1" value="1"><span class="hint">Each about <span data-m="1.9 m²" data-i="20 sq ft"></span></span></div>
+<div class="field"><label>Windows</label><input id="wins" type="number" min="0" step="1" value="1"><span class="hint">Each about <span data-m="1.5 m²" data-i="15 sq ft"></span></span></div>
+</div>
+<label class="check"><input id="ceil" type="checkbox" checked> Paint the ceiling too</label>
+<h3>Paint</h3>
+<div class="row two">
+<div class="field"><label>Coats</label><select id="coats"><option>1</option><option selected>2</option><option>3</option></select></div>
+<div class="field"><label>Coverage (<span data-m="m² per litre" data-i="sq ft per gallon"></span>)</label><input id="cov" type="number" inputmode="decimal" min="0" step="any"><span class="hint">Check the tin. Rough or porous surfaces cover less.</span></div>
+</div>
+<label class="check"><input id="spare" type="checkbox" checked> Add 10% spare for touch-ups</label>
+</div>
+<div class="result">
+<div class="lbl">Wall paint</div><div class="big" id="rWall">–</div>
+<dl>
+<dt>Wall area (after openings)</dt><dd id="rWallA">–</dd>
+<dt>Ceiling area</dt><dd id="rCeilA">–</dd>
+<dt>Ceiling paint</dt><dd id="rCeil">–</dd>
+<dt>Suggested tins (walls)</dt><dd id="rTinsW">–</dd>
+<dt>Suggested tins (ceiling)</dt><dd id="rTinsC">–</dd>
+</dl>
+<div class="promo">⚡ Quoting this job? <b>QuoteWalk</b> scans the room with your iPhone, measures every wall and builds the quote for you.<div class="btns">{STORE_QW}</div></div>
+</div>
+</div>
+</div></section>
+
+<section class="alt"><div class="wrap prose">
+<h2>How the paint calculation works</h2>
+<p>Wall area is the room's perimeter times the wall height: 2 × (length + width) × height. Doors and windows are taken off, then the area is multiplied by the number of coats and divided by the paint's coverage.</p>
+<p>Most interior acrylics cover roughly 12–16 m² per litre per coat, or around 350–400 sq ft per US gallon, on smooth, sealed walls. Fresh plaster, bare timber and rough or dark surfaces take more, so use the figure on your tin and allow a primer or sealer coat where needed.</p>
+<h3>Example</h3>
+<p>A 4 m × 3.5 m bedroom with 2.4 m walls, one door and one window: 2 × 7.5 × 2.4 = 36 m², less 3.4 m² of openings = 32.6 m². Two coats at 12 m²/L is about 5.4 L, so one 4 L tin plus a 2 L tin, or a 10 L tin if you're doing more than one room.</p>
+<h3>Tips</h3>
+<ul><li>Buy enough of one batch to finish each colour, so the shade matches.</li><li>Ceilings usually take a dedicated ceiling paint, so work them out separately.</li><li>Feature walls: work out the feature colour as its own wall (width × height).</li></ul>
+</div></section>
+<script>
+(function(){
+var imp=false;
+function tins(q,isImp){
+  if(q<=0) return "–";
+  if(isImp){ // 5 gal pails, 1 gal, quarts
+    var qt=Math.ceil(q*4), p=Math.floor(qt/20); qt-=p*20; var g=Math.floor(qt/4); qt-=g*4;
+    if(qt>=3){g++;qt=0}
+    if(g>=4&&p===0&&q>3.5){p=1;g=0;qt=0}
+    return [p?p+" × 5 gal":"",g?g+" × 1 gal":"",qt?qt+" × quart":""].filter(Boolean).join(" + ");
+  }
+  var l=Math.ceil(q), t=Math.floor(l/10); l-=t*10;
+  if(l>8){t++;l=0}
+  var f=Math.floor(l/4); l-=f*4; if(l>2){f++;l=0}
+  var o=l>1?1:0, one=l===1?1:0; // 2L or 1L
+  return [t?t+" × 10 L":"",f?f+" × 4 L":"",o?"1 × 2 L":"",one?"1 × 1 L":""].filter(Boolean).join(" + ")||"1 × 1 L";
+}
+function calc(){
+  var L=TA.num("len"),W=TA.num("wid"),H=TA.num("hei"),coats=+document.getElementById("coats").value,cov=TA.num("cov");
+  var door=imp?20:1.9,win=imp?15:1.5, au=imp?"sq ft":"m²", vu=imp?"gal":"L";
+  var wall=Math.max(0,2*(L+W)*H-TA.num("doors")*door-TA.num("wins")*win);
+  var ceil=document.getElementById("ceil").checked?L*W:0;
+  var k=document.getElementById("spare").checked?1.1:1;
+  var pw=cov?wall*coats/cov*k:0, pc=cov?ceil*coats/cov*k:0;
+  var ok=L&&W&&H&&cov;
+  document.getElementById("rWall").textContent=ok?TA.fmt(pw,1)+" "+vu:"–";
+  document.getElementById("rWallA").textContent=ok?TA.fmt(wall,1)+" "+au:"–";
+  document.getElementById("rCeilA").textContent=ok?TA.fmt(ceil,1)+" "+au:"–";
+  document.getElementById("rCeil").textContent=ok&&ceil?TA.fmt(pc,1)+" "+vu:"–";
+  document.getElementById("rTinsW").textContent=ok?tins(pw,imp):"–";
+  document.getElementById("rTinsC").textContent=ok&&ceil?tins(pc,imp):"–";
+}
+TA.units(function(i){imp=i;document.getElementById("cov").value=i?375:12;calc();});
+document.querySelectorAll("input,select").forEach(function(e){e.addEventListener("input",calc);e.addEventListener("change",calc);});
+})();
+</script>

@@ -1,0 +1,78 @@
+<!-- title: Painting Quote Calculator – Price a job per m² or sq ft
+desc: Free quote calculator for painters, tilers and flooring installers. Enter areas and your own rates per m² or sq ft, add materials and GST or sales tax to get the quote total.
+-->
+<section><div class="wrap">
+<h1>Quote calculator</h1>
+<p class="lead">Price a painting, tiling or flooring job by area with your own rates, then add materials and tax.</p>
+<div class="units"><button data-u="met">Per m²</button><button data-u="imp">Per sq ft</button></div>
+<div class="calc">
+<div class="card">
+<h3>Labour</h3>
+<div class="qrow" style="display:grid;grid-template-columns:2fr 1fr 1fr 32px;gap:8px;font-size:.8rem;font-weight:700;color:var(--muted)"><span>Item</span><span>Area (<span data-m="m²" data-i="sq ft"></span>)</span><span>Rate ($/<span data-m="m²" data-i="sq ft"></span>)</span><span></span></div>
+<div class="qrows" id="rows"></div>
+<button class="add" id="addRow" type="button">+ Add line</button>
+<h3>Extras</h3>
+<div class="row two">
+<div class="field"><label>Materials ($)</label><input id="mat" type="number" inputmode="decimal" min="0" step="any" value="0"><span class="hint">Paint, tiles, adhesive, grout, underlay…</span></div>
+<div class="field"><label>Prep / call-out / other ($)</label><input id="other" type="number" inputmode="decimal" min="0" step="any" value="0"></div>
+</div>
+<div class="row two">
+<div class="field"><label>Materials markup (%)</label><input id="markup" type="number" inputmode="decimal" min="0" step="any" value="0"></div>
+<div class="field"><label>Tax (%)</label><input id="tax" type="number" inputmode="decimal" min="0" step="any"><span class="hint">GST in Australia is 10%. Set your local sales tax, or 0.</span></div>
+</div>
+<label class="check"><input id="incl" type="checkbox"> My rates already include tax</label>
+</div>
+<div class="result">
+<div class="lbl">Quote total</div><div class="big" id="rTotal">–</div>
+<dl>
+<dt>Total area</dt><dd id="rArea">–</dd>
+<dt>Labour</dt><dd id="rLab">–</dd>
+<dt>Materials (with markup)</dt><dd id="rMat">–</dd>
+<dt>Other</dt><dd id="rOther">–</dd>
+<dt id="rTaxL">Tax</dt><dd id="rTax">–</dd>
+<dt>Effective price per <span data-m="m²" data-i="sq ft"></span></dt><dd id="rPer">–</dd>
+</dl>
+<div class="promo">⚡ Want this as a branded PDF the customer signs on site? <b>QuoteWalk</b> scans the room, applies your rates and builds the quote in about a minute.<div class="btns">{STORE_QW}</div></div>
+</div>
+</div>
+</div></section>
+
+<section class="alt"><div class="wrap prose">
+<h2>How to price a job by area</h2>
+<p>Most painters, tilers and flooring installers quote labour as a rate per square metre (or square foot) for each type of surface: walls, ceilings, trims, floors. Multiply each area by its rate, add materials (often with a small markup to cover pick-up and handling), add any prep or call-out charge, then tax.</p>
+<p>Your rate should cover your time, travel, consumables, insurance and the profit you need, so work it out from your own costs rather than copying someone else's. A quick check: divide the total by the area. If the effective price per m² looks too low for the prep involved, your rate probably is too.</p>
+<h3>Common lines on a painting quote</h3>
+<ul><li>Walls, 2 coats</li><li>Ceilings, 2 coats</li><li>Doors and frames (often priced per item)</li><li>Skirting and architraves (per metre)</li><li>Prep: patching, sanding, sealing</li></ul>
+</div></section>
+<script>
+(function(){
+var imp=false, rows=document.getElementById("rows");
+function addRow(d,a,r){
+  var div=document.createElement("div");div.className="qrow";
+  div.innerHTML='<input placeholder="e.g. Walls – 2 coats" value="'+(d||"")+'"><input type="number" inputmode="decimal" min="0" step="any" class="qa" value="'+(a||"")+'"><input type="number" inputmode="decimal" min="0" step="any" class="qr" value="'+(r||"")+'"><button type="button" aria-label="Remove">×</button>';
+  div.querySelector("button").onclick=function(){div.remove();calc();};
+  div.querySelectorAll("input").forEach(function(e){e.addEventListener("input",calc);});
+  rows.appendChild(div);
+}
+function calc(){
+  var area=0,lab=0;
+  rows.querySelectorAll(".qrow").forEach(function(r){var a=parseFloat(r.querySelector(".qa").value)||0,p=parseFloat(r.querySelector(".qr").value)||0;area+=a;lab+=a*p;});
+  var mat=TA.num("mat")*(1+TA.num("markup")/100), other=TA.num("other"), t=TA.num("tax")/100, incl=document.getElementById("incl").checked;
+  var sub=lab+mat+other, tax, total;
+  if(incl){total=sub;tax=sub-sub/(1+t);}else{tax=sub*t;total=sub+tax;}
+  var au=imp?"sq ft":"m²";
+  document.getElementById("rArea").textContent=area?TA.fmt(area,2)+" "+au:"–";
+  document.getElementById("rLab").textContent=TA.money(lab);
+  document.getElementById("rMat").textContent=TA.money(mat);
+  document.getElementById("rOther").textContent=TA.money(other);
+  document.getElementById("rTaxL").textContent=incl?"Includes tax":"Tax";
+  document.getElementById("rTax").textContent=TA.money(tax);
+  document.getElementById("rTotal").textContent=total?TA.money(total):"–";
+  document.getElementById("rPer").textContent=area&&total?TA.money(total/area):"–";
+}
+addRow("Walls – 2 coats");addRow("Ceiling – 2 coats");
+document.getElementById("addRow").onclick=function(){addRow();};
+["mat","other","markup","tax","incl"].forEach(function(id){var e=document.getElementById(id);e.addEventListener("input",calc);e.addEventListener("change",calc);});
+TA.units(function(i){imp=i;var tx=document.getElementById("tax");if(tx.value==="")tx.value=i?0:10;calc();});
+})();
+</script>
